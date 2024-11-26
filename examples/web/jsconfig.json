@@ -14,7 +14,7 @@
     "include": [
         "src/**/*",
         "server/**/*",
-        "../../lib/javascript/**/*"
+        "../../lib/**/*"
     ],
     "exclude": [
         "node_modules",

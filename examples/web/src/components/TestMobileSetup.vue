@@ -1,84 +1,22 @@
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { on } from "js-native-bridge";
-import { HelloNativeService } from "../services/native";
+import {
+    createTestKotlinJavascriptInterface,
+    useToastNativeService,
+    useGeoLocationNativeService,
+} from "../services/native";
 
 const isLoaded = ref(false);
-const msg = ref(null);
+createTestKotlinJavascriptInterface().then(() => isLoaded.value = true);
 
-const fetchNativeClientValidation = async () => {
-    try {
+const { showToast } = useToastNativeService();
+const { getCurrentLoc } = useGeoLocationNativeService();
 
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        const response = await axios.post("/api/v1/native-client/validate", {
-            clientKey: import.meta.env.VITE_JSNATIVEBRIDGE_KOTLINANDROIDV1_KEY,
-        });
-
-        const { credentialsName, credentials, expireDays } = response.data;
-        Cookies.set(credentialsName, credentials, { expires: expireDays, path: "" });
-        console.info("credential is saved to cookie");
-        isLoaded.value = true;
-
-        return response.data;
-
-    } catch(err) {
-        console.error(err);
-        return null;
-    }
+const onBtnToastClick = () => showToast("WEB says: Hello NATIVE");
+const onBtnLocClick = async () => {
+    const loc = await getCurrentLoc();
+    console.log(loc);
 };
-
-const setupNativeApi = (data) => {
-    if(!data) return;
-
-    window.AndroidInterface = {
-
-        onMessage(message) {
-            try {
-
-                const { eventName, data } = JSON.parse(message);
-                window.AndroidInterface[eventName](data);
-
-            } catch(err) {
-                console.error(err);
-            }
-        },
-
-        postMessage(eventName, data = null) {
-            const message = JSON.stringify({ eventName, data });
-            window.JSNativeBridge.AndroidWebviewClient.message(message);
-        },
-
-        helloNative(data) {
-            const message = data?.message || "UNKNOWN MESSAGE";
-            console.log(message);
-        },
-
-        helloWeb() {
-            window.AndroidInterface.postMessage("helloWeb", {
-                message: "NATIVE says: Hello WEB"
-            });
-        },
-
-    };
-
-    const { credentialsName } = data;
-    const bridgeName = "AndroidWebviewClient";
-    const nativeListenerName = "AndroidInterface.onMessage";
-    window.JSNativeBridge.init(credentialsName, bridgeName, nativeListenerName, (err) => {
-        if(err)
-            console.error(err);
-    });
-
-    on("helloWeb", ({ message }) => msg.value = message);
-    HelloNativeService.call({
-        message: "WEB says: Hello NATIVE"
-    });
-};
-
-fetchNativeClientValidation().then(setupNativeApi);
 </script>
 <template>
     <div id="wrapper">
@@ -97,7 +35,14 @@ fetchNativeClientValidation().then(setupNativeApi);
                     <div></div>
                 </div>
             </div>
-            <h1 v-if="msg">{{ msg }}</h1>
+            <template v-else>
+                <div class="btn-test-wrapper">
+                    <button type="button" @click="onBtnToastClick">Test Native Toast</button>
+                </div>
+                <div class="btn-test-wrapper">
+                    <button type="button" @click="onBtnLocClick">Test Native Geo Location</button>
+                </div>
+            </template>
         </div>
     </div>
 </template>
@@ -229,5 +174,26 @@ header > * {
 .cube div:nth-of-type(6) {
     -webkit-transform: translateZ(20px);
     transform: translateZ(20px);
+}
+
+.btn-test-wrapper {
+    text-align: center;
+}
+
+.btn-test-wrapper > button {
+    -webkit-appearance: button;
+    appearance: button;
+    color: rgb(255 255 255 / 1);
+    font-weight: 600;
+    font-size: .875rem;
+    line-height: 1.25rem;
+    text-align: center;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background-color: rgb(79 70 229 / 1);
+    cursor: pointer;
+    border: 1px solid #54297f;
 }
 </style>
