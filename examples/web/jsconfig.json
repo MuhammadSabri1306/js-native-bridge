@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "es2022",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "baseUrl": ".",
+        "paths": {
+            "@src/*": ["src/*"],
+            "@server/*": ["server/*"]
+        },
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true
+    },
+    "include": [
+        "src/**/*",
+        "server/**/*",
+        "../../lib/javascript/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

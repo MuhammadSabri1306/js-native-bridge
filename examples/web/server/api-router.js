@@ -27,15 +27,15 @@ apiV1Router.post("/native-client/validate", (req, res) => {
         });
     }
 
-    const expiredAt = Math.floor(Date.now() + (3600 * 24 * 30));
-    let credentials = { ...nativeClient, expiredAt };
-    credentials = Buffer.from( JSON.stringify(credentials) ).toString("base64");
-
+    const expireDays = 30;
+    const payload = { ...nativeClient, expireDays };
+    const credentials = Buffer.from( JSON.stringify(payload) ).toString("base64");
     res.json({
         success: true,
         nativeClient,
-        credentialName: process.env.JSNATIVEBRIDGE_COOKIE_NAME,
+        credentialsName: process.env.JSNATIVEBRIDGE_COOKIE_NAME,
         credentials,
+        expireDays,
     });
 });
 

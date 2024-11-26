@@ -1,8 +1,11 @@
 import path from "path";
+import dotenv from "dotenv";
 import express from "express";
 import viewRouter from "./view-router.js";
 import assetRouter from "./asset-router.js";
 import apiRouter from "./api-router.js";
+
+dotenv.config({ path: path.join(path.resolve(), ".env") });
 
 const port = process.env.PORT || 3000;
 const publicPath = path.join(path.resolve(), "public");
